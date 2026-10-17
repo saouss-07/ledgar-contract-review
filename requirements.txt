@@ -26,5 +26,10 @@ seaborn==0.13.2
 pyyaml==6.0.3
 tqdm==4.70.1
 
+# Notebooks : exécution locale (Colab les fournit déjà)
+ipykernel==7.4.0
+nbconvert==7.17.2
+nbformat==5.11.1
+
 # Outil Git : retire les sorties des notebooks avant chaque commit
 nbstripout==0.9.1

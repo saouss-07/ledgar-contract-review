@@ -1,0 +1,101 @@
+label,label_name,train,validation,test,freq_group
+47,Governing Laws,3167,494,582,fréquente
+65,Notices,2493,398,422,fréquente
+26,Counterparts,2427,429,490,fréquente
+38,Entire Agreements,2340,389,376,fréquente
+79,Severability,1808,332,412,fréquente
+85,Survival,1469,260,222,fréquente
+2,Amendments,1467,257,224,fréquente
+7,Assignments,1327,208,195,fréquente
+41,Expenses,1224,170,183,fréquente
+89,Terms,1166,169,176,fréquente
+88,Terminations,1112,193,118,fréquente
+51,Insurances,1104,204,133,fréquente
+87,Taxes,1089,214,185,fréquente
+58,Litigations,1034,166,129,fréquente
+20,Confidentiality,1012,149,167,fréquente
+45,Further Assurances,1009,155,152,fréquente
+46,General,976,150,203,fréquente
+19,Compliance With Laws,960,167,208,fréquente
+49,Indemnifications,936,140,152,fréquente
+97,Waivers,878,155,166,fréquente
+92,Use Of Proceeds,866,137,120,fréquente
+68,Payments,856,175,126,fréquente
+96,Waiver Of Jury Trials,768,146,111,fréquente
+61,No Conflicts,741,108,104,fréquente
+43,Financial Statements,677,100,82,fréquente
+75,Remedies,664,119,118,fréquente
+11,Base Salary,656,114,112,fréquente
+74,Releases,621,91,60,fréquente
+10,Authorizations,620,106,90,fréquente
+31,Disclosures,590,104,97,fréquente
+13,Binding Effects,588,93,126,fréquente
+48,Headings,587,126,220,fréquente
+42,Fees,578,121,89,fréquente
+76,Representations,569,92,94,fréquente
+29,Definitions,566,93,119,moyenne
+83,Subsidiaries,563,95,63,moyenne
+9,Authority,549,69,62,moyenne
+18,Closings,541,80,64,moyenne
+99,Withholdings,517,87,107,moyenne
+98,Warranties,499,88,97,moyenne
+59,Miscellaneous,479,67,79,moyenne
+53,Intellectual Property,473,70,64,moyenne
+24,Cooperation,469,67,82,moyenne
+33,Effective Dates,462,76,74,moyenne
+67,Participations,459,81,70,moyenne
+95,Vesting,451,83,87,moyenne
+63,No Waivers,445,75,84,moyenne
+84,Successors,444,91,96,moyenne
+22,Consents,444,57,81,moyenne
+16,Capitalization,434,68,63,moyenne
+80,Solvency,419,73,66,moyenne
+66,Organizations,409,68,73,moyenne
+23,Construction,406,69,63,moyenne
+12,Benefits,397,82,81,moyenne
+15,Brokers,389,68,70,moyenne
+55,Interpretations,386,79,76,moyenne
+6,Arbitration,385,68,47,moyenne
+86,Tax Withholdings,380,57,75,moyenne
+54,Interests,366,51,42,moyenne
+64,Non-Disparagement,363,55,46,moyenne
+32,Duties,354,61,58,moyenne
+28,Defined Terms,354,72,56,moyenne
+91,Transactions With Affiliates,353,76,46,moyenne
+4,Applicable Laws,352,69,53,moyenne
+17,Change In Control,349,43,87,moyenne
+71,Publicity,345,50,42,moyenne
+93,Vacations,341,53,52,moyenne
+77,Sales,327,49,45,rare
+62,No Defaults,327,56,63,rare
+81,Specific Performance,326,48,43,rare
+0,Adjustments,326,48,88,rare
+39,Erisa,324,57,58,rare
+73,Records,323,54,31,rare
+90,Titles,317,44,45,rare
+57,Liens,313,55,49,rare
+35,Employment,308,42,47,rare
+52,Integration,304,53,59,rare
+44,Forfeitures,300,46,52,rare
+27,Death,278,51,66,rare
+50,Indemnity,271,47,29,rare
+30,Disability,263,43,48,rare
+40,Existence,258,37,42,rare
+60,Modifications,255,40,55,rare
+1,Agreements,252,22,48,rare
+36,Enforceability,244,57,45,rare
+82,Submission To Jurisdiction,238,42,29,rare
+34,Effectiveness,229,46,31,rare
+56,Jurisdictions,202,33,29,rare
+37,Enforcements,201,46,42,rare
+69,Positions,190,34,32,rare
+5,Approvals,178,26,26,rare
+21,Consent To Jurisdiction,175,35,33,rare
+25,Costs,168,22,15,rare
+94,Venues,131,19,20,rare
+70,Powers,125,15,13,rare
+78,Sanctions,118,24,14,rare
+3,Anti-Corruption Laws,106,26,23,rare
+72,Qualifications,47,8,5,rare
+8,Assigns,31,3,4,rare
+14,Books,23,0,2,rare
