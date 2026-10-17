@@ -27,3 +27,7 @@ wandb/
 .DS_Store
 .vscode/
 .idea/
+
+# --- Sorties du mode rapide FAST_RUN (jamais commitées) ---
+*_fast.csv
+*_fast_*.csv

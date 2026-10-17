@@ -1,0 +1,4 @@
+model,C,class_weight,split,accuracy,macro_f1
+tfidf_logreg,30.0,balanced,validation,0.8763,0.8191029499763722
+tfidf_logreg,30.0,balanced,test,0.8732,0.8283753325223546
+tfidf_logreg,30.0,balanced,test_sans_doublons,0.8698291829594567,0.8247848813996133

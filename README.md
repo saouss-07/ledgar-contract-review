@@ -58,11 +58,30 @@ _À compléter avant de lancer le fine-tuning._
 
 ## Reproduire les résultats
 
-_Une commande par expérience, à compléter au fil du projet._
+Une commande par expérience ; `FAST_RUN=1` devant une commande la lance sur un sous-échantillon pour vérifier qu'elle tourne.
+
+| Expérience | Commande | Sorties |
+| --- | --- | --- |
+| Tests unitaires | `python -m pytest tests` | — |
+| Exploration des données | `jupyter nbconvert --to notebook --execute notebooks/01_eda.ipynb` | `results/figures/`, `results/tables/class_counts.csv` |
+| Couverture des métadonnées | `python -m ledgar.metadata` | `results/tables/metadata_coverage.csv` |
+| Baseline TF-IDF (m1) | `python -m ledgar.baseline` (≈ 25 min sur CPU) | `results/tables/baseline_*.csv`, `results/predictions/baseline_*.csv` |
 
 ## Résultats
 
-_À compléter._
+Métrique principale : **macro-F1** (100 classes très déséquilibrées). Tous les choix sont faits sur la validation ; le test n'est évalué qu'avec le modèle retenu.
+
+| Modèle | Réglage (choisi sur la validation) | Macro-F1 validation | Macro-F1 test | Accuracy test | Jalon |
+| --- | --- | --- | --- | --- | --- |
+| TF-IDF (mots + bigrammes) + régression logistique | C = 30, `class_weight="balanced"` | 0,819 | 0,828 | 0,873 | m1 |
+
+Sans les 2,8 % de clauses du test déjà présentes dans le train, la macro-F1 de la baseline est de 0,825 : les doublons ne gonflent pas le score de manière notable. La grille complète est dans `results/tables/baseline_grid.csv` ; avec ou sans pondération des classes, l'écart est de 0,001 au plus. Les confusions les plus fréquentes (`results/tables/baseline_top_confusions.csv`) sont les paires quasi synonymes repérées pendant l'exploration (*Governing Laws* / *Applicable Laws*, *Tax Withholdings* / *Withholdings*…).
+
+## Règles de travail
+
+- On ne modifie jamais `main` directement : une branche par tâche, puis une Pull Request (modèle pré-rempli).
+- Phase 0 (setup, jusqu'au tag `m1`) : PR fusionnées par leur auteur. Ensuite : relecture obligatoire par un autre membre, puis squash merge.
+- Jamais de données, de modèles ni de sorties de notebook dans Git. Les prédictions (`results/predictions/`) ne contiennent que `idx, label, pred, confidence`.
 
 ## Équipe
 
