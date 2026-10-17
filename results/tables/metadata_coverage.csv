@@ -1,0 +1,34 @@
+attribut,valeur,clauses_test,part
+jurisdiction_group,aucune,9203,0.9203
+jurisdiction_group,autre État US,279,0.0279
+jurisdiction_group,New York,232,0.0232
+jurisdiction_group,Delaware,180,0.018
+jurisdiction_group,California,55,0.0055
+jurisdiction_group,Texas,41,0.0041
+jurisdiction_group,hors US,10,0.001
+party_type,non précisé,4846,0.4846
+party_type,personne physique,2371,0.2371
+party_type,société,1434,0.1434
+party_type,institution financière,1349,0.1349
+contract_type,inconnu,4475,0.4475
+contract_type,financement,2299,0.2299
+contract_type,emploi,1834,0.1834
+contract_type,acquisition,861,0.0861
+contract_type,bail,282,0.0282
+contract_type,services,158,0.0158
+contract_type,licence,91,0.0091
+gender,aucun,9521,0.9521
+gender,masculin,299,0.0299
+gender,mixte,143,0.0143
+gender,féminin,37,0.0037
+length_group,moyen,4740,0.474
+length_group,court,3037,0.3037
+length_group,long,2223,0.2223
+has_amount,False,9678,0.9678
+has_amount,True,322,0.0322
+has_duration,False,9242,0.9242
+has_duration,True,758,0.0758
+all_caps,False,9765,0.9765
+all_caps,True,235,0.0235
+redacted,False,9981,0.9981
+redacted,True,19,0.0019
