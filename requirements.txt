@@ -7,6 +7,7 @@ datasets==5.1.0
 transformers==5.20.1
 accelerate==1.15.0
 sentence-transformers==6.1.0
+peft==0.21.2
 
 # Recherche
 faiss-cpu==1.15.1
