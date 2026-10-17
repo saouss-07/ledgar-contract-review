@@ -1,0 +1,5 @@
+mesure,valeur
+doublons_train,0.02975
+conflits_label,3.0
+fuite_test,0.0282
+fuite_validation,0.027
