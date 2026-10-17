@@ -1,0 +1,29 @@
+# Versions figées : tout le monde (et le jury) obtient exactement le même environnement.
+# torch n'est PAS listé : Colab le fournit déjà avec la bonne version CUDA.
+# En local : pip install torch  (puis noter la version utilisée dans le README).
+
+# Données et modèles
+datasets==5.1.0
+transformers==5.20.1
+accelerate==1.15.0
+sentence-transformers==6.1.0
+
+# Recherche
+faiss-cpu==1.15.1
+rank-bm25==0.2.2
+
+# Baseline, métriques, analyse
+scikit-learn==1.9.1
+numpy==2.5.4
+pandas==3.0.6
+
+# Visualisation
+matplotlib==3.11.2
+seaborn==0.13.2
+
+# Utilitaires
+pyyaml==6.0.3
+tqdm==4.70.1
+
+# Outil Git : retire les sorties des notebooks avant chaque commit
+nbstripout==0.9.1

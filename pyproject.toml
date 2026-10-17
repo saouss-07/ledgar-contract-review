@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ledgar"
+version = "0.1.0"
+description = "NLP core of a contract-review assistant: clause classification, clause retrieval and bias audit on LEDGAR"
+readme = "README.md"
+requires-python = ">=3.10"
+# Les dépendances exactes sont dans requirements.txt (versions figées pour la reproductibilité).
+# Ce fichier sert uniquement à rendre le code de src/ importable via `pip install -e .`.
+
+[tool.setuptools.packages.find]
+where = ["src"]
