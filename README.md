@@ -54,7 +54,12 @@ reports/        model card
 
 ## Hypothèse (écrite avant les expériences du jalon m4)
 
-_À compléter avant de lancer le fine-tuning._
+Modèle : `nlpaueb/legal-bert-base-uncased`, max_length 256, lr 2e-5, 3 epochs, batch 16, warmup 10 %, weight decay 0,01.
+LoRA : W_Q et W_V, α = 2r, lr 5e-4, r ∈ {4, 8, 16}. Tous les choix sont faits sur la validation.
+
+- **H1** : Legal-BERT fine-tuné complètement dépasse la baseline TF-IDF en macro-F1 sur le test ; l'intervalle à 95 % du bootstrap apparié (1 000 tirages) de la différence exclut 0.
+- **H2** : LoRA r = 8 reste à moins de 2 points de macro-F1 du fine-tuning complet en entraînant moins de 2 % des paramètres ; la différence d'accuracy est testée par McNemar.
+- **H3** : passer de r = 4 à r = 16 apporte moins de 1 point de macro-F1.
 
 ## Reproduire les résultats
 
