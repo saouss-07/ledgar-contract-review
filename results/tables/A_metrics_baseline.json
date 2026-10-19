@@ -1,0 +1,22 @@
+{
+  "run": "baseline",
+  "model": "TF-IDF + LogReg (C=10.0, balanced)",
+  "lora_r": null,
+  "trainable_params": 17347800,
+  "total_params": 17347800,
+  "trainable_pct": 100.0,
+  "train_time_min": 8.3,
+  "peak_gpu_mem_gb": 0.0,
+  "validation": {
+    "accuracy": 0.8711,
+    "macro_f1": 0.8138070646261177
+  },
+  "test": {
+    "accuracy": 0.8685,
+    "macro_f1": 0.8233585699198852
+  },
+  "test_dedup": {
+    "accuracy": 0.8649927968717843,
+    "macro_f1": 0.8197037991652028
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "full_ft vs baseline": {
+    "mcnemar": {
+      "b_only_A_right": 456,
+      "c_only_B_right": 455,
+      "test": "chi2 (continuity corr.)",
+      "chi2": 0.0,
+      "p_value": 1.0
+    },
+    "bootstrap": {
+      "delta_macro_f1_pts": -4.4,
+      "ci95_pts": [
+        -5.44,
+        -2.78
+      ],
+      "significant": true
+    }
+  },
+  "full_ft vs lora_r8": {
+    "mcnemar": {
+      "b_only_A_right": 338,
+      "c_only_B_right": 180,
+      "test": "chi2 (continuity corr.)",
+      "chi2": 47.584942084942085,
+      "p_value": 5.267150910890984e-12
+    },
+    "bootstrap": {
+      "delta_macro_f1_pts": 1.1,
+      "ci95_pts": [
+        0.23,
+        2.52
+      ],
+      "significant": true
+    }
+  },
+  "lora_r8 vs baseline": {
+    "mcnemar": {
+      "b_only_A_right": 446,
+      "c_only_B_right": 603,
+      "test": "chi2 (continuity corr.)",
+      "chi2": 23.199237368922784,
+      "p_value": 1.4605523840311671e-06
+    },
+    "bootstrap": {
+      "delta_macro_f1_pts": -5.49,
+      "ci95_pts": [
+        -6.81,
+        -4.05
+      ],
+      "significant": true
+    }
+  }
+}

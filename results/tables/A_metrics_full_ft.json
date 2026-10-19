@@ -1,0 +1,27 @@
+{
+  "run": "full_ft",
+  "model": "nlpaueb/legal-bert-base-uncased",
+  "lora_r": null,
+  "lr": 2e-05,
+  "epochs": 3,
+  "max_length": 256,
+  "trainable_params": 109559140,
+  "total_params": 109559140,
+  "trainable_pct": 100.0,
+  "train_time_min": 42.4,
+  "peak_gpu_mem_gb": 3.26,
+  "test_inference_s": 41.1,
+  "best_checkpoint": "/content/ckpt/full_ft/checkpoint-11250",
+  "validation": {
+    "accuracy": 0.8693,
+    "macro_f1": 0.7923556575872869
+  },
+  "test": {
+    "accuracy": 0.8686,
+    "macro_f1": 0.7793673213625186
+  },
+  "test_dedup": {
+    "accuracy": 0.866124717019963,
+    "macro_f1": 0.7767590270061625
+  }
+}
