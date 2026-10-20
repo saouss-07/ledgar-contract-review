@@ -8,7 +8,7 @@ epoch kept is the one with the best macro-F1 on validation (early stopping); the
     python -m ledgar.lstm             # about 3 min per epoch on a T4, much slower on a laptop CPU
     FAST_RUN=1 python -m ledgar.lstm  # quick check on the subsample
 
-Outputs: results/tables/lstm_history.csv, lstm_results.csv, lstm_f1_per_class.csv, lstm_top_confusions.csv,
+Outputs: results/tables/lstm_history.csv, results/figures/lstm_learning_curve.png, lstm_results.csv, lstm_f1_per_class.csv, lstm_top_confusions.csv,
 results/predictions/lstm_{validation,test}.csv. The weights go to models/lstm.pt (ignored by Git).
 GloVe comes from the Hugging Face Hub (sentence-transformers/average_word_embeddings_glove.6B.300d), stored as
 safetensors + a JSON vocabulary: no pickle, no extra dependency.
@@ -33,7 +33,7 @@ MODEL_DIR = ROOT / "models"
 GLOVE_REPO = "sentence-transformers/average_word_embeddings_glove.6B.300d"
 
 CONFIG = dict(max_len=256, min_freq=2, emb_dim=300, hidden=128, dropout=0.3, batch_size=64, lr=1e-3,
-              weight_decay=1e-4, epochs=10, patience=2, clip=1.0)
+              weight_decay=1e-4, epochs=20, patience=2, clip=1.0)
 PAD, UNK = 0, 1
 _TOKEN_RE = re.compile(r"[a-z]+|'[a-z]+|\d+|[^\sa-z\d]")
 
@@ -140,6 +140,60 @@ def predict_proba(model, sequences, device, batch_size=256):
     return probs
 
 
+def plot_learning_curve(history, baseline_val_f1=0.819, path=ROOT / "results" / "figures" / "lstm_learning_curve.png"):
+    """Validation macro-F1 and training loss per epoch (two panels, one axis each), the chosen epoch marked."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.ticker import FuncFormatter
+
+    h = pd.DataFrame(history)
+    blue, orange, ink, muted, grid, surface = "#2a78d6", "#eb6834", "#0b0b0b", "#6b6a64", "#e6e5e0", "#fcfcfb"
+    best, best_f1, last = int(h.loc[h.val_macro_f1.idxmax(), "epoch"]), h.val_macro_f1.max(), int(h.epoch.iloc[-1])
+    comma = lambda d: FuncFormatter(lambda v, _: f"{v:.{d}f}".replace(".", ","))
+    plt.rcParams.update({"font.size": 11, "axes.edgecolor": muted, "axes.labelcolor": ink, "xtick.color": muted,
+                         "ytick.color": muted})
+    fig, (a1, a2) = plt.subplots(2, 1, figsize=(8, 6.2), sharex=True, gridspec_kw={"height_ratios": [1.6, 1]},
+                                 facecolor=surface)
+    for a in (a1, a2):
+        a.set_facecolor(surface)
+        a.grid(axis="y", color=grid, lw=0.8)
+        a.set_axisbelow(True)
+        for side in ("top", "right"):
+            a.spines[side].set_visible(False)
+        a.axvline(best, color=muted, lw=1, ls=":", zorder=0)
+    a1.plot(h.epoch, h.val_macro_f1, color=blue, lw=2, marker="o", ms=6, mec=surface, mew=1.5, zorder=3)
+    a1.axhline(baseline_val_f1, color=muted, lw=1.2, ls="--")
+    a1.text(1.05, baseline_val_f1 + 0.004, f"baseline TF-IDF ({baseline_val_f1:.3f})".replace(".", ","), color=muted,
+            fontsize=10, va="bottom")
+    a1.annotate(f"epoch retenue : {best}\nmacro-F1 validation : {best_f1:.3f}".replace("0.", "0,"), xy=(best, best_f1),
+                xytext=(best - 4.4, best_f1 - 0.065), color=ink, fontsize=10,
+                arrowprops=dict(arrowstyle="-", color=muted, lw=1))
+    if last > best:
+        a1.annotate("arrêt : 2 epochs\nsans gain", xy=(last, h.val_macro_f1.iloc[-1]), xytext=(last - 1.4, 0.70),
+                    color=muted, fontsize=9.5, arrowprops=dict(arrowstyle="-", color=muted, lw=1))
+    a1.set_ylim(0.6, 0.84)
+    a1.set_ylabel("macro-F1 (validation)")
+    a1.yaxis.set_major_formatter(comma(2))
+    a1.set_title(f"BiLSTM + GloVe : la validation plafonne à l'epoch {best}, sous la baseline", loc="left", color=ink,
+                 fontsize=12.5, pad=10)
+    a2.plot(h.epoch, h.train_loss, color=orange, lw=2, marker="o", ms=6, mec=surface, mew=1.5, zorder=3)
+    a2.set_ylim(0, 2.1)
+    a2.set_ylabel("loss d'entraînement")
+    a2.yaxis.set_major_formatter(comma(1))
+    a2.set_xlabel("epoch")
+    a2.set_xticks(h.epoch)
+    a2.text((1 + last) / 2 + 1, 0.72, "la loss d'entraînement continue de baisser", color=muted, fontsize=9.5,
+            ha="center")
+    fig.text(0.01, 0.005, "Choix de l'epoch sur la validation uniquement (early stopping, patience 2).", color=muted,
+             fontsize=8.5)
+    fig.tight_layout(rect=(0, 0.02, 1, 1))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(path, dpi=200, facecolor=surface)
+    plt.close(fig)
+    return path
+
+
 def main(cfg=CONFIG):
     set_seed()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -182,6 +236,8 @@ def main(cfg=CONFIG):
                 print(f"early stopping: no gain on validation for {waited} epochs")
                 break
     pd.DataFrame(history).to_csv(TAB_DIR / f"lstm_history{tag}.csv", index=False)
+    if not FAST_RUN:
+        plot_learning_curve(history)
     model.load_state_dict(best_state)
     torch.save({"state_dict": best_state, "vocab": vocab, "config": cfg}, MODEL_DIR / f"lstm{tag}.pt")
     best_epoch = max(history, key=lambda r: r["val_macro_f1"])["epoch"]

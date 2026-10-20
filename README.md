@@ -67,7 +67,7 @@ Une commande par expérience ; `FAST_RUN=1` devant une commande la lance sur un 
 | Couverture des métadonnées | `python -m ledgar.metadata` | `results/tables/metadata_coverage.csv` |
 | Baseline TF-IDF (m1) | `python -m ledgar.baseline` (≈ 25 min sur CPU) | `results/tables/baseline_*.csv`, `results/predictions/baseline_*.csv` |
 | Recherche de clauses (m2) | `python -m ledgar.retrieval` (≈ 5 min sur T4, ≈ 1 h 30 sur CPU) | `results/tables/retrieval_*.csv` |
-| LSTM + GloVe (m3) | `python -m ledgar.lstm` (GPU conseillé) | `results/tables/lstm_*.csv`, `results/predictions/lstm_*.csv` |
+| LSTM + GloVe (m3) | `python -m ledgar.lstm` (GPU conseillé) | `results/tables/lstm_*.csv`, `results/predictions/lstm_*.csv`, `results/figures/lstm_learning_curve.png` |
 | Volet B sur Colab | `notebooks/B_retrieval_lstm.ipynb` | les deux lignes ci-dessus + analyse d'erreurs |
 
 ## Résultats
@@ -77,11 +77,11 @@ Métrique principale : **macro-F1** (100 classes très déséquilibrées). Tous 
 | Modèle | Réglage (choisi sur la validation) | Macro-F1 validation | Macro-F1 test | Accuracy test | Jalon |
 | --- | --- | --- | --- | --- | --- |
 | TF-IDF (mots + bigrammes) + régression logistique | C = 30, `class_weight="balanced"` | 0,819 | 0,828 | 0,873 | m1 |
-| BiLSTM + GloVe 6B 300d, max-pooling | 10 epochs max, meilleure epoch = 9 (validation) | 0,780 | 0,778 | 0,853 | m3 |
+| BiLSTM + GloVe 6B 300d, max-pooling | 20 epochs max, early stopping (patience 2), meilleure epoch = 11 | 0,788 | 0,787 | 0,860 | m3 |
 
 Sans les 2,8 % de clauses du test déjà présentes dans le train, la macro-F1 de la baseline est de 0,825 : les doublons ne gonflent pas le score de manière notable. La grille complète est dans `results/tables/baseline_grid.csv` ; avec ou sans pondération des classes, l'écart est de 0,001 au plus. Les confusions les plus fréquentes (`results/tables/baseline_top_confusions.csv`) sont les paires quasi synonymes repérées pendant l'exploration (*Governing Laws* / *Applicable Laws*, *Tax Withholdings* / *Withholdings*…).
 
-**LSTM (m3).** Entraîné sur un GPU T4 de Colab (19 s par epoch). Il reste sous la baseline : −5,0 points de macro-F1 (bootstrap apparié, IC 95 % [−6,4 ; −3,7]), McNemar p < 10⁻⁹ (374 clauses bien classées par le seul LSTM, 573 par la seule baseline). L'écart vient surtout des classes rares (F1 moyenne 0,69 contre 0,77 pour le tiers le moins fréquent, 0,86 contre 0,88 pour le plus fréquent). Les confusions principales sont les mêmes paires quasi synonymes que la baseline (*Applicable Laws* → *Governing Laws*, *Waivers* → *No Waivers*, *Integration* → *Entire Agreements*). La validation progressait encore à la 10ᵉ epoch : l'early stopping ne s'est pas déclenché.
+**LSTM (m3).** Entraîné sur un GPU T4 de Colab (19 s par epoch) ; l'early stopping s'arrête à l'epoch 13 et garde l'epoch 11, la meilleure sur la validation (`results/figures/lstm_learning_curve.png`). Les 10 premières epochs sont identiques, au dixième de millième près, à celles d'un premier run plafonné à 10 epochs : le seed rend l'entraînement reproductible. Le LSTM reste sous la baseline : −4,1 points de macro-F1 (bootstrap apparié, IC 95 % [−5,5 ; −2,8]), McNemar p < 10⁻⁵ (384 clauses bien classées par le seul LSTM, 521 par la seule baseline). L'écart vient surtout des classes rares (F1 moyenne 0,70 contre 0,77 pour le tiers le moins fréquent, 0,87 contre 0,88 pour le plus fréquent). Les confusions principales sont les mêmes paires quasi synonymes que la baseline (*Applicable Laws* → *Governing Laws*, *Waivers* → *No Waivers*, *Integration* → *Entire Agreements*).
 
 ### Recherche de clauses (m2)
 
