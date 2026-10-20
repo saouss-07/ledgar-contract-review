@@ -69,6 +69,7 @@ Une commande par expérience ; `FAST_RUN=1` devant une commande la lance sur un 
 | Recherche de clauses (m2) | `python -m ledgar.retrieval` (≈ 5 min sur T4, ≈ 1 h 30 sur CPU) | `results/tables/retrieval_*.csv` |
 | LSTM + GloVe (m3) | `python -m ledgar.lstm` (GPU conseillé) | `results/tables/lstm_*.csv`, `results/predictions/lstm_*.csv`, `results/figures/lstm_learning_curve.png` |
 | Volet B sur Colab | `notebooks/B_retrieval_lstm.ipynb` | les deux lignes ci-dessus + analyse d'erreurs |
+| Comparaison de 7 encodeurs (volet B) | `python -m ledgar.encoders` (GPU, ≈ 45 min sur T4) ou `notebooks/B2_retrieval_encoders.ipynb` | `results/tables/retrieval_encoders.csv`, `results/figures/retrieval_encoders.png` |
 
 ## Résultats
 
