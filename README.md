@@ -77,8 +77,25 @@ Métrique principale : **macro-F1** (100 classes très déséquilibrées). Tous 
 | Modèle | Réglage (choisi sur la validation) | Macro-F1 validation | Macro-F1 test | Accuracy test | Jalon |
 | --- | --- | --- | --- | --- | --- |
 | TF-IDF (mots + bigrammes) + régression logistique | C = 30, `class_weight="balanced"` | 0,819 | 0,828 | 0,873 | m1 |
+| BiLSTM + GloVe 6B 300d, max-pooling | 10 epochs max, meilleure epoch = 9 (validation) | 0,780 | 0,778 | 0,853 | m3 |
 
 Sans les 2,8 % de clauses du test déjà présentes dans le train, la macro-F1 de la baseline est de 0,825 : les doublons ne gonflent pas le score de manière notable. La grille complète est dans `results/tables/baseline_grid.csv` ; avec ou sans pondération des classes, l'écart est de 0,001 au plus. Les confusions les plus fréquentes (`results/tables/baseline_top_confusions.csv`) sont les paires quasi synonymes repérées pendant l'exploration (*Governing Laws* / *Applicable Laws*, *Tax Withholdings* / *Withholdings*…).
+
+**LSTM (m3).** Entraîné sur un GPU T4 de Colab (19 s par epoch). Il reste sous la baseline : −5,0 points de macro-F1 (bootstrap apparié, IC 95 % [−6,4 ; −3,7]), McNemar p < 10⁻⁹ (374 clauses bien classées par le seul LSTM, 573 par la seule baseline). L'écart vient surtout des classes rares (F1 moyenne 0,69 contre 0,77 pour le tiers le moins fréquent, 0,86 contre 0,88 pour le plus fréquent). Les confusions principales sont les mêmes paires quasi synonymes que la baseline (*Applicable Laws* → *Governing Laws*, *Waivers* → *No Waivers*, *Integration* → *Entire Agreements*). La validation progressait encore à la 10ᵉ epoch : l'early stopping ne s'est pas déclenché.
+
+### Recherche de clauses (m2)
+
+Banque = les 60 000 clauses du train ; une clause retrouvée est pertinente si elle a le type de la clause requête. Test, jumeaux exacts du train retirés du classement :
+
+| Méthode | P@1 | P@5 | P@10 | MRR@10 |
+| --- | --- | --- | --- | --- |
+| TF-IDF, cosinus | 0,832 | 0,779 | 0,748 | 0,872 |
+| `all-MiniLM-L6-v2`, cosinus | 0,807 | 0,748 | 0,719 | 0,853 |
+| MiniLM + filtre sur la classe prédite par la baseline | 0,873 | 0,873 | 0,873 | 0,873 |
+
+- Le vocabulaire des contrats est très standardisé : la recherche lexicale bat les embeddings génériques.
+- Avec le filtre, la P@k est bornée par l'accuracy du classifieur (0,873) : un meilleur classifieur améliore directement la recherche.
+- Questions d'avocat (`results/tables/retrieval_examples.csv`, vérifiées à la main) : 4 sur 5 donnent des clauses pertinentes en mode hybride ; pour « termination clauses with a 30-day notice period », les 5 résultats sont des résiliations à 30 jours. Échec documenté : une question hors des 100 types (non-concurrence) est forcée dans une classe (*Benefits*) et l'hybride fait pire que la sémantique seule.
 
 ## Règles de travail
 
