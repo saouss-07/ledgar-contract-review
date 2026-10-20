@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 from scipy import sparse
 
-from ledgar.retrieval import (durations, label_in_question, mrr, precision_at_k, rank_bank, relevance, top_k,
-                              twin_index)
+from ledgar.retrieval import (ClauseBank, durations, label_in_question, mrr, precision_at_k, rank_bank, relevance,
+                              similarity, top_k, twin_index)
 
 rng = np.random.default_rng(0)
 BANK = rng.normal(size=(200, 16)).astype(np.float32)
@@ -64,3 +64,43 @@ def test_label_in_question():
                                                                                                   "Termination")
     assert label_in_question("which law governs the contract?", names) is None
     assert names[label_in_question("Governing law of Delaware", names)] == "Governing Laws"
+
+
+def test_fusion_is_the_weighted_sum_of_cosines():
+    other = rng.normal(size=(200, 8)).astype(np.float32)
+    other /= np.linalg.norm(other, axis=1, keepdims=True)
+    fused = similarity([BANK[:4], sparse.csr_matrix(other[:4])], [BANK, sparse.csr_matrix(other)], 0, 4, [0.25, 0.75])
+    assert np.allclose(fused, 0.25 * BANK[:4] @ BANK.T + 0.75 * other[:4] @ other.T, atol=1e-5)
+    assert np.array_equal(rank_bank([BANK[:5], other[:5]], [BANK, other], 3, weights=[1.0, 0.0]),
+                          rank_bank(BANK[:5], BANK, 3))
+
+
+class _Encoder:
+    """Stands for the sentence-transformer: query i of the bank is encoded as bank vector i."""
+    def encode(self, texts, **kwargs):
+        return BANK[[int(t.split()[-1]) for t in texts]]
+
+
+class _Classifier:
+    classes_ = np.arange(4)
+
+    def __init__(self, confidence):
+        self.confidence = confidence
+
+    def predict_proba(self, texts):
+        p = np.full((len(texts), 4), (1 - self.confidence) / 3)
+        p[:, 2] = self.confidence
+        return p
+
+
+def test_low_confidence_type_is_not_used_as_filter():
+    texts, labels = [f"clause {i}" for i in range(200)], np.arange(200) % 4
+    for confidence, expected in ((0.9, "2"), (0.3, None)):
+        bank = ClauseBank(texts, labels, ["0", "1", "2", "3"], BANK, _Encoder(), _Classifier(confidence),
+                          min_confidence=0.5)
+        res = bank.search("query 5", k=5, label="predicted", exclude_twins=False)
+        assert res["filter_label"].iloc[0] == expected
+        if expected is None:
+            assert res["bank_idx"].iloc[0] == 5               # whole bank: the clause itself comes first
+        else:
+            assert (res["label_name"] == "2").all()

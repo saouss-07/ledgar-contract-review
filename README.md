@@ -85,17 +85,20 @@ Sans les 2,8 % de clauses du test déjà présentes dans le train, la macro-F1 d
 
 ### Recherche de clauses (m2)
 
-Banque = les 60 000 clauses du train ; une clause retrouvée est pertinente si elle a le type de la clause requête. Test, jumeaux exacts du train retirés du classement :
+Banque = les 60 000 clauses du train ; une clause retrouvée est pertinente si elle a le type de la clause requête. Les deux réglages (poids de la fusion, seuil de confiance) sont choisis sur la validation (`results/tables/retrieval_choices.csv`). Test, jumeaux exacts du train retirés du classement :
 
 | Méthode | P@1 | P@5 | P@10 | MRR@10 |
 | --- | --- | --- | --- | --- |
 | TF-IDF, cosinus | 0,832 | 0,779 | 0,748 | 0,872 |
 | `all-MiniLM-L6-v2`, cosinus | 0,807 | 0,748 | 0,719 | 0,853 |
-| MiniLM + filtre sur la classe prédite par la baseline | 0,873 | 0,873 | 0,873 | 0,873 |
+| Fusion 0,5 × MiniLM + 0,5 × TF-IDF | 0,842 | 0,789 | 0,760 | 0,880 |
+| Fusion + filtre sur la classe prédite par la baseline | 0,873 | 0,873 | 0,873 | 0,873 |
+| Fusion + filtre seulement si la confiance du classifieur ≥ 0,2 (version retenue) | 0,873 | 0,873 | 0,872 | 0,875 |
 
-- Le vocabulaire des contrats est très standardisé : la recherche lexicale bat les embeddings génériques.
+- Le vocabulaire des contrats est très standardisé : la recherche lexicale bat les embeddings génériques, et la fusion des deux bat chacune (+1 point de P@5 sur TF-IDF, +4 sur MiniLM).
 - Avec le filtre, la P@k est bornée par l'accuracy du classifieur (0,873) : un meilleur classifieur améliore directement la recherche.
-- Questions d'avocat (`results/tables/retrieval_examples.csv`, vérifiées à la main) : 4 sur 5 donnent des clauses pertinentes en mode hybride ; pour « termination clauses with a 30-day notice period », les 5 résultats sont des résiliations à 30 jours. Échec documenté : une question hors des 100 types (non-concurrence) est forcée dans une classe (*Benefits*) et l'hybride fait pire que la sémantique seule.
+- Seuil de confiance : sur la validation, toutes les clauses appartiennent aux 100 types, donc filtrer aide toujours et le meilleur seuil serait 0, ce qui ne protège pas les questions hors des types. On garde le seuil le plus haut qui coûte au plus 0,5 point de P@5 en validation : 0,2. Sur le test, il ne coûte rien.
+- Questions d'avocat (`results/tables/retrieval_examples.csv`, vérifiées à la main) : pour « termination clauses with a 30-day notice period », les 5 résultats hybrides sont des résiliations à 30 jours. Les questions hors des 100 types (non-concurrence, limitation de responsabilité du fournisseur) ont une confiance de 0,16 et 0,05 : elles ne sont plus forcées dans une mauvaise classe (avant : *Benefits*). Les résultats restent peu pertinents, car LEDGAR n'a pas de type pour ces clauses : c'est une limite du jeu de données, pas un réglage.
 
 ## Règles de travail
 
