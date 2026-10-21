@@ -1,0 +1,27 @@
+{
+  "run": "full_ft_es10",
+  "model": "nlpaueb/legal-bert-base-uncased",
+  "lora_r": null,
+  "lr": 2e-05,
+  "epochs": 15,
+  "max_length": 256,
+  "trainable_params": 109559140,
+  "total_params": 109559140,
+  "trainable_pct": 100.0,
+  "train_time_min": 151.6,
+  "peak_gpu_mem_gb": 3.26,
+  "test_inference_s": 35.2,
+  "best_checkpoint": "/content/drive/MyDrive/ledgar_A/ckpt_full_ft_es10/checkpoint-37500",
+  "validation": {
+    "accuracy": 0.8856,
+    "macro_f1": 0.8246317785795884
+  },
+  "test": {
+    "accuracy": 0.8828,
+    "macro_f1": 0.825178574128201
+  },
+  "test_dedup": {
+    "accuracy": 0.8797077587981066,
+    "macro_f1": 0.8216317003080487
+  }
+}

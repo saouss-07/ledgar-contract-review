@@ -49,5 +49,39 @@
       ],
       "significant": true
     }
+  },
+  "full_ft_es15 vs baseline": {
+    "mcnemar": {
+      "b_only_A_right": 480,
+      "c_only_B_right": 337,
+      "test": "chi2 (continuity corr.)",
+      "chi2": 24.680538555691555,
+      "p_value": 6.766400421801697e-07
+    },
+    "bootstrap": {
+      "delta_macro_f1_pts": 0.18,
+      "ci95_pts": [
+        -1.05,
+        1.24
+      ],
+      "significant": false
+    }
+  },
+  "full_ft_es15 vs full_ft": {
+    "mcnemar": {
+      "b_only_A_right": 393,
+      "c_only_B_right": 251,
+      "test": "chi2 (continuity corr.)",
+      "chi2": 30.87111801242236,
+      "p_value": 2.757451069736937e-08
+    },
+    "bootstrap": {
+      "delta_macro_f1_pts": 4.58,
+      "ci95_pts": [
+        2.61,
+        5.7
+      ],
+      "significant": true
+    }
   }
 }
