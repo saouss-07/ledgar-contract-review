@@ -1,6 +1,6 @@
 """Volet A (milestone m4): results tables of the fine-tuned Legal-BERT runs against the common baseline.
 
-The runs themselves are trained on a Colab GPU by notebooks/A_finetune_bert_lora.ipynb, which writes
+The runs themselves are trained on a Colab GPU by notebooks/partie_A_notebook.ipynb, which writes
 results/predictions/<model>_{validation,test}.csv (common format, see ledgar.metrics) and
 results/tables/finetune_metrics_<model>.json (parameters, training time, GPU memory, scores).
 This module only reads those files, so it runs on any CPU in a few seconds:

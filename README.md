@@ -71,7 +71,7 @@ Une commande par expérience ; `FAST_RUN=1` devant une commande la lance sur un 
 | Exploration des données | `jupyter nbconvert --to notebook --execute notebooks/01_eda.ipynb` | `results/figures/`, `results/tables/class_counts.csv` |
 | Couverture des métadonnées | `python -m ledgar.metadata` | `results/tables/metadata_coverage.csv` |
 | Baseline TF-IDF (m1) | `python -m ledgar.baseline` (≈ 25 min sur CPU) | `results/tables/baseline_*.csv`, `results/predictions/baseline_*.csv` |
-| Fine-tuning Legal-BERT et LoRA (m4) | `notebooks/A_finetune_bert_lora.ipynb` sur Colab, GPU T4 (≈ 42 min par run complet de 3 epochs, ≈ 34 min par run LoRA) | `results/predictions/legalbert_*.csv`, `results/tables/finetune_metrics_*.json` |
+| Fine-tuning Legal-BERT et LoRA (m4) | `notebooks/partie_A_notebook.ipynb` sur Colab, GPU T4 (≈ 42 min par run complet de 3 epochs, ≈ 34 min par run LoRA) | `results/predictions/legalbert_*.csv`, `results/tables/finetune_metrics_*.json` |
 | Tableaux du volet A contre la baseline commune (m4) | `python -m ledgar.finetune_report` (quelques secondes sur CPU) | `results/tables/finetune_tradeoff.csv`, `finetune_paired_tests.csv`, `finetune_f1_by_freq_group.csv`, `finetune_f1_per_class.csv` |
 
 ## Résultats
