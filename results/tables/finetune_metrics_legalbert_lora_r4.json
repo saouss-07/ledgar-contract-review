@@ -1,5 +1,5 @@
 {
-  "run": "lora_r4",
+  "run": "legalbert_lora_r4",
   "model": "nlpaueb/legal-bert-base-uncased",
   "lora_r": 4,
   "lr": 0.0005,
@@ -11,7 +11,6 @@
   "train_time_min": 34.9,
   "peak_gpu_mem_gb": 1.97,
   "test_inference_s": 44.2,
-  "best_checkpoint": "/content/ckpt/lora_r4/checkpoint-11250",
   "validation": {
     "accuracy": 0.8433,
     "macro_f1": 0.7494195916434988

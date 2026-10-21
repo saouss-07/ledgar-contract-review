@@ -1,5 +1,5 @@
 {
-  "run": "full_ft_es10",
+  "run": "legalbert_full_es",
   "model": "nlpaueb/legal-bert-base-uncased",
   "lora_r": null,
   "lr": 2e-05,
@@ -11,7 +11,6 @@
   "train_time_min": 151.6,
   "peak_gpu_mem_gb": 3.26,
   "test_inference_s": 35.2,
-  "best_checkpoint": "/content/drive/MyDrive/ledgar_A/ckpt_full_ft_es10/checkpoint-37500",
   "validation": {
     "accuracy": 0.8856,
     "macro_f1": 0.8246317785795884
@@ -23,5 +22,6 @@
   "test_dedup": {
     "accuracy": 0.8797077587981066,
     "macro_f1": 0.8216317003080487
-  }
+  },
+  "note": "Exploratoire, ajouté après l'hypothèse : max 15 epochs, arrêt anticipé (patience 2) sur la macro-F1 de validation ; arrêt à l'epoch 12, meilleure epoch 10."
 }

@@ -1,5 +1,5 @@
 {
-  "run": "full_ft",
+  "run": "legalbert_full_3ep",
   "model": "nlpaueb/legal-bert-base-uncased",
   "lora_r": null,
   "lr": 2e-05,
@@ -11,7 +11,6 @@
   "train_time_min": 42.4,
   "peak_gpu_mem_gb": 3.26,
   "test_inference_s": 41.1,
-  "best_checkpoint": "/content/ckpt/full_ft/checkpoint-11250",
   "validation": {
     "accuracy": 0.8693,
     "macro_f1": 0.7923556575872869
