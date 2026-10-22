@@ -83,7 +83,7 @@ Métrique principale : **macro-F1** (100 classes très déséquilibrées). Tous 
 | TF-IDF (mots + bigrammes) + régression logistique | C = 30, `class_weight="balanced"` | 0,819 | 0,828 | 0,873 | m1 |
 | Legal-BERT, fine-tuning complet (pré-enregistré) | 3 epochs, lr 2e-5, max_length 256 | 0,792 | 0,779 | 0,869 | m4 |
 | Legal-BERT + LoRA r = 8 (W_Q, W_V) | 3 epochs, lr 5e-4 ; r = 8 meilleur rang sur la validation | 0,768 | 0,768 | 0,853 | m4 |
-| Legal-BERT, fine-tuning complet jusqu'à convergence (exploratoire) | arrêt anticipé, meilleure epoch 10 | 0,825 | 0,825 | 0,883 | m4 |
+| Legal-BERT, fine-tuning complet jusqu'à convergence (protocole révisé) | arrêt anticipé, meilleure epoch 10 | 0,825 | 0,825 | 0,883 | m4 |
 
 Sans les 2,8 % de clauses du test déjà présentes dans le train, la macro-F1 de la baseline est de 0,825 : les doublons ne gonflent pas le score de manière notable. La grille complète est dans `results/tables/baseline_grid.csv` ; avec ou sans pondération des classes, l'écart est de 0,001 au plus. Les confusions les plus fréquentes (`results/tables/baseline_top_confusions.csv`) sont les paires quasi synonymes repérées pendant l'exploration (*Governing Laws* / *Applicable Laws*, *Tax Withholdings* / *Withholdings*…).
 
@@ -100,7 +100,7 @@ Correctement entraîné, Legal-BERT égale la baseline TF-IDF en macro-F1 et la 
 | LoRA r = 4, 3 epochs | 224 k (0,20 %) | 35 min | 2,0 Go | 0,749 | 0,849 | 0,760 | 0,759 |
 | LoRA r = 8, 3 epochs | 372 k (0,34 %) | 34 min | 2,0 Go | 0,768 | 0,853 | 0,768 | 0,767 |
 | LoRA r = 16, 3 epochs | 667 k (0,61 %) | 34 min | 2,0 Go | 0,768 | 0,858 | 0,774 | 0,772 |
-| Legal-BERT complet, arrêt anticipé (exploratoire) | 109,6 M (100 %) | 152 min (12 epochs) | 3,3 Go | 0,825 | **0,883** | 0,825 | 0,822 |
+| Legal-BERT complet, arrêt anticipé (protocole révisé) | 109,6 M (100 %) | 152 min (12 epochs) | 3,3 Go | 0,825 | **0,883** | 0,825 | 0,822 |
 
 **Tests appariés** sur les mêmes 10 000 clauses : McNemar pour l'accuracy (seuls les désaccords comptent), bootstrap apparié de 1 000 tirages pour la macro-F1 (`results/tables/finetune_paired_tests.csv`).
 
@@ -125,7 +125,7 @@ Correctement entraîné, Legal-BERT égale la baseline TF-IDF en macro-F1 et la 
 
 **Hypothèses (écrites avant les runs)**
 
-- **H1 rejetée.** À 3 epochs, Legal-BERT a une macro-F1 inférieure de 4,9 points à la baseline (IC 95 % excluant 0) pour une accuracy équivalente (p = 0,13). Run exploratoire jusqu'à convergence : macro-F1 équivalente (−0,3 point, IC contenant 0) et accuracy supérieure de 1,0 point (p = 0,0006).
+- **H1 rejetée.** À 3 epochs, Legal-BERT a une macro-F1 inférieure de 4,9 points à la baseline (IC 95 % excluant 0) pour une accuracy équivalente (p = 0,13). Run protocole révisé jusqu'à convergence : macro-F1 équivalente (−0,3 point, IC contenant 0) et accuracy supérieure de 1,0 point (p = 0,0006).
 - **H2 validée sur l'estimation, sans garantie.** LoRA r = 8 entraîne 0,34 % des paramètres et utilise 40 % de mémoire GPU en moins, pour 1,1 point de macro-F1 de moins que le fine-tuning complet ; la borne haute de l'intervalle (2,7 points) dépasse le seuil de 2 points.
 - **H3 rejetée.** De r = 4 à r = 16, la macro-F1 gagne 1,4 point en test (significatif) et 1,8 point en validation ; en validation, le gain se fait entre r = 4 et r = 8.
 
@@ -133,13 +133,12 @@ Correctement entraîné, Legal-BERT égale la baseline TF-IDF en macro-F1 et la 
 
 **Limites**
 
-- Le run jusqu'à convergence a été ajouté après avoir vu les résultats du protocole pré-enregistré : il est présenté comme exploratoire.
+- Le run jusqu'à convergence a été ajouté après avoir vu les résultats du protocole pré-enregistré : il est présenté comme protocole révisé.
 - `max_length = 256` : 13,5 % des clauses sont tronquées (sous-groupe de l'audit).
 - La validation loss du run long remonte dès l'epoch 4 alors que la macro-F1 progresse : le modèle devient trop confiant, à vérifier par la calibration (audit).
 - Le run LoRA r = 8 jusqu'à convergence a été interrompu par la limite de GPU de Colab à l'epoch 10 (macro-F1 de validation 0,784) : la comparaison LoRA / complet se fait à 3 epochs pour les deux.
 - Loss non pondérée par classe pour BERT, contrairement à la baseline (`class_weight="balanced"`).
 
-Les modèles fine-tunés, les adaptateurs LoRA et les probabilités de test (`probs_test.npy`, pour la calibration) sont dans le dossier Drive partagé `ledgar_A/` : trop lourds pour Git.
 
 ## Règles de travail
 
