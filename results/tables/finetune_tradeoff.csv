@@ -1,0 +1,7 @@
+modele,description,params_entraines,pct_entraines,epochs_max,temps_min,memoire_gpu_go,val_macro_f1,test_accuracy,test_macro_f1,test_macro_f1_sans_doublons
+baseline,"TF-IDF + régression logistique (baseline commune, m1)",,,,,,0.8191029499763722,0.8732,0.8283753325223546,0.8247848813996133
+legalbert_full_3ep,"Legal-BERT, fine-tuning complet, 3 epochs (pré-enregistré)",109559140.0,100.0,3.0,42.4,3.26,0.7923556575872869,0.8686,0.7793673213625186,0.7767590270061625
+legalbert_lora_r4,"Legal-BERT + LoRA r=4, 3 epochs",224356.0,0.204,3.0,34.9,1.97,0.7494195916434988,0.8486,0.7597961043085306,0.7589325197751964
+legalbert_lora_r8,"Legal-BERT + LoRA r=8, 3 epochs",371812.0,0.338,3.0,33.9,1.98,0.7683822013637747,0.8528,0.768413995040209,0.7673549715792504
+legalbert_lora_r16,"Legal-BERT + LoRA r=16, 3 epochs",666724.0,0.605,3.0,33.9,1.98,0.7675030341679472,0.8578,0.7735671464966671,0.7715747088845964
+legalbert_full_es,"Legal-BERT, fine-tuning complet, arrêt anticipé (exploratoire)",109559140.0,100.0,15.0,151.6,3.26,0.8246317785795884,0.8828,0.825178574128201,0.8216317003080487
