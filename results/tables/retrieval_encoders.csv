@@ -1,0 +1,31 @@
+model,alpha,split,P@1,P@5,P@10,MRR@10,method,hf_name,params_M,dim,encode_train_s
+tfidf,0.0,validation,0.8327,0.77812,0.74932,0.8706120634920635,TF-IDF seul,,,,
+e5-base,1.0,validation,0.8387,0.79184,0.76459,0.8783216269841269,encodeur seul,intfloat/e5-base-v2,109.5,768.0,130.4
+bge-base,1.0,validation,0.8369,0.78616,0.75844,0.8756839285714286,encodeur seul,BAAI/bge-base-en-v1.5,109.5,768.0,128.8
+legal-bert,1.0,validation,0.8381,0.78574,0.76073,0.8758143253968254,encodeur seul,nlpaueb/legal-bert-base-uncased,109.5,768.0,129.5
+bge-small,1.0,validation,0.8354,0.78428,0.75821,0.8750987698412697,encodeur seul,BAAI/bge-small-en-v1.5,33.4,384.0,65.5
+gte-base,1.0,validation,0.8311,0.7801,0.75265,0.8717347222222223,encodeur seul,thenlper/gte-base,109.5,768.0,128.6
+minilm,1.0,validation,0.8124,0.75572,0.72406,0.8561674206349206,encodeur seul,sentence-transformers/all-MiniLM-L6-v2,22.7,384.0,52.2
+mpnet,1.0,validation,0.8083,0.75208,0.72312,0.8534619444444445,encodeur seul,sentence-transformers/all-mpnet-base-v2,109.5,768.0,155.2
+bge-base,0.75,validation,0.8509,0.80086,0.77363,0.8859690079365078,fusion avec TF-IDF,BAAI/bge-base-en-v1.5,109.5,768.0,128.8
+e5-base,0.75,validation,0.8508,0.79986,0.77388,0.8853575396825396,fusion avec TF-IDF,intfloat/e5-base-v2,109.5,768.0,130.4
+bge-small,0.75,validation,0.8502,0.79946,0.7725,0.885688373015873,fusion avec TF-IDF,BAAI/bge-small-en-v1.5,33.4,384.0,65.5
+legal-bert,0.75,validation,0.8512,0.799,0.773,0.8861183333333332,fusion avec TF-IDF,nlpaueb/legal-bert-base-uncased,109.5,768.0,129.5
+gte-base,0.75,validation,0.847,0.79794,0.77128,0.8829940079365078,fusion avec TF-IDF,thenlper/gte-base,109.5,768.0,128.6
+mpnet,0.5,validation,0.8482,0.79434,0.76698,0.8830463095238094,fusion avec TF-IDF,sentence-transformers/all-mpnet-base-v2,109.5,768.0,155.2
+minilm,0.5,validation,0.8424,0.79006,0.7621,0.8794594841269842,fusion avec TF-IDF,sentence-transformers/all-MiniLM-L6-v2,22.7,384.0,52.2
+tfidf,0.0,test,0.8322,0.7787,0.74828,0.8715242063492064,TF-IDF seul,,,,
+e5-base,1.0,test,0.8343,0.7851,0.75902,0.8755914682539682,encodeur seul,intfloat/e5-base-v2,109.5,768.0,130.4
+legal-bert,1.0,test,0.8321,0.78312,0.75511,0.8735056349206348,encodeur seul,nlpaueb/legal-bert-base-uncased,109.5,768.0,129.5
+bge-base,1.0,test,0.8385,0.78296,0.7545,0.876925119047619,encodeur seul,BAAI/bge-base-en-v1.5,109.5,768.0,128.8
+bge-small,1.0,test,0.8307,0.77836,0.75293,0.8707079761904762,encodeur seul,BAAI/bge-small-en-v1.5,33.4,384.0,65.5
+gte-base,1.0,test,0.8279,0.77684,0.7495,0.8705353571428571,encodeur seul,thenlper/gte-base,109.5,768.0,128.6
+minilm,1.0,test,0.8072,0.74808,0.71852,0.8527687301587302,encodeur seul,sentence-transformers/all-MiniLM-L6-v2,22.7,384.0,52.2
+mpnet,1.0,test,0.797,0.7447,0.716,0.8450369444444444,encodeur seul,sentence-transformers/all-mpnet-base-v2,109.5,768.0,155.2
+bge-base,0.75,test,0.8477,0.79854,0.77042,0.8840590476190476,fusion avec TF-IDF,BAAI/bge-base-en-v1.5,109.5,768.0,128.8
+e5-base,0.75,test,0.8484,0.79848,0.77128,0.8847802380952382,fusion avec TF-IDF,intfloat/e5-base-v2,109.5,768.0,130.4
+bge-small,0.75,test,0.8451,0.79698,0.7689,0.8824461111111112,fusion avec TF-IDF,BAAI/bge-small-en-v1.5,33.4,384.0,65.5
+legal-bert,0.75,test,0.8453,0.7966,0.76842,0.8827300396825398,fusion avec TF-IDF,nlpaueb/legal-bert-base-uncased,109.5,768.0,129.5
+gte-base,0.75,test,0.8482,0.79654,0.76987,0.88453123015873,fusion avec TF-IDF,thenlper/gte-base,109.5,768.0,128.6
+mpnet,0.5,test,0.8444,0.7923,0.76372,0.8815288095238095,fusion avec TF-IDF,sentence-transformers/all-mpnet-base-v2,109.5,768.0,155.2
+minilm,0.5,test,0.8418,0.78946,0.76041,0.8794188888888888,fusion avec TF-IDF,sentence-transformers/all-MiniLM-L6-v2,22.7,384.0,52.2

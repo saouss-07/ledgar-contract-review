@@ -101,6 +101,27 @@ Banque = les 60 000 clauses du train ; une clause retrouvée est pertinente si e
 - Seuil de confiance : sur la validation, toutes les clauses appartiennent aux 100 types, donc filtrer aide toujours et le meilleur seuil serait 0, ce qui ne protège pas les questions hors des types. On garde le seuil le plus haut qui coûte au plus 0,5 point de P@5 en validation : 0,2. Sur le test, il ne coûte rien.
 - Questions d'avocat (`results/tables/retrieval_examples.csv`, vérifiées à la main) : pour « termination clauses with a 30-day notice period », les 5 résultats hybrides sont des résiliations à 30 jours. Les questions hors des 100 types (non-concurrence, limitation de responsabilité du fournisseur) ont une confiance de 0,16 et 0,05 : elles ne sont plus forcées dans une mauvaise classe (avant : *Benefits*). Les résultats restent peu pertinents, car LEDGAR n'a pas de type pour ces clauses : c'est une limite du jeu de données, pas un réglage.
 
+### Quel encodeur pour la banque de clauses ? (volet B)
+
+7 encodeurs pré-entraînés, sans entraînement, même protocole que ci-dessus (`python -m ledgar.encoders`, Colab T4, textes coupés à 256 sous-mots pour tous). Chacun est mesuré seul, puis fusionné avec TF-IDF (alpha choisi sur la validation). Test, jumeaux retirés (`results/tables/retrieval_encoders.csv`, `results/figures/retrieval_encoders.png`) :
+
+| Encodeur | Paramètres | P@5 seul | P@5 fusion (alpha) | MRR@10 fusion |
+| --- | --- | --- | --- | --- |
+| TF-IDF seul (référence) | — | 0,779 | — | 0,872 |
+| `all-MiniLM-L6-v2` (jalon m2) | 23 M | 0,748 | 0,790 (0,5) | 0,879 |
+| `all-mpnet-base-v2` | 110 M | 0,745 | 0,792 (0,5) | 0,882 |
+| `bge-small-en-v1.5` | 33 M | 0,778 | 0,797 (0,75) | 0,882 |
+| `gte-base` | 110 M | 0,777 | 0,797 (0,75) | 0,885 |
+| Legal-BERT (mean pooling) | 110 M | 0,783 | 0,797 (0,75) | 0,883 |
+| `e5-base-v2` | 110 M | 0,785 | 0,799 (0,75) | 0,885 |
+| `bge-base-en-v1.5` | 110 M | 0,783 | 0,799 (0,75) | 0,884 |
+
+- Les encodeurs récents entraînés pour la recherche (e5, bge, gte) rattrapent TF-IDF seuls ; MiniLM et mpnet restent 3 points dessous.
+- La fusion avec TF-IDF aide **tous** les encodeurs : lexical et sémantique se complètent.
+- Les 5 meilleures fusions tiennent en 0,2 point de P@5 : l'écart n'est pas significatif à cette échelle. `bge-small` fait aussi bien que les modèles 3 fois plus gros pour 2 fois moins de temps d'encodage : c'est le meilleur compromis pour un déploiement.
+- Legal-BERT, pré-entraîné sur des contrats mais pas pour la similarité, égale les encodeurs généralistes : le domaine compense l'absence d'entraînement à la recherche.
+- La fusion MiniLM retrouve 0,790 comme `ledgar.retrieval` (0,789) : les deux implémentations concordent.
+
 ## Règles de travail
 
 - On ne modifie jamais `main` directement : une branche par tâche, puis une Pull Request (modèle pré-rempli).
