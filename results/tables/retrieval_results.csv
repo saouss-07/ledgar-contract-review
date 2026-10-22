@@ -1,0 +1,25 @@
+method,split,twins_removed,P@1,P@5,P@10,MRR@10
+tfidf_cosinus,validation,False,0.8356,0.77906,0.74983,0.8728083730158731
+minilm,validation,False,0.8157,0.75674,0.72487,0.8587537698412698
+fusion (alpha = 0.5),validation,False,0.8449,0.79092,0.76271,0.8813290079365079
+minilm + classe predite,validation,False,0.8763,0.8763,0.8763,0.8763
+fusion + classe predite,validation,False,0.8763,0.8763,0.8763,0.8763
+fusion + classe predite si confiance >= 0.2,validation,False,0.8739,0.8729,0.87249,0.8757582936507935
+tfidf_cosinus,validation,True,0.8331,0.77812,0.74933,0.8708120634920635
+minilm,validation,True,0.8122,0.75552,0.7241,0.8560982142857143
+fusion (alpha = 0.5),validation,True,0.8424,0.78998,0.76214,0.8794155158730158
+minilm + classe predite,validation,True,0.8763,0.8763,0.8763,0.8763
+fusion + classe predite,validation,True,0.8763,0.8763,0.8763,0.8763
+fusion + classe predite si confiance >= 0.2,validation,True,0.8739,0.8729,0.87249,0.8757582936507935
+tfidf_cosinus,test,False,0.8344,0.77968,0.74889,0.8730592063492062
+minilm,test,False,0.8092,0.74928,0.71915,0.8542869444444444
+fusion (alpha = 0.5),test,False,0.8433,0.79056,0.76109,0.8804977777777778
+minilm + classe predite,test,False,0.8732,0.8732,0.8732,0.8732
+fusion + classe predite,test,False,0.8732,0.8732,0.8732,0.8732
+fusion + classe predite si confiance >= 0.2,test,False,0.873,0.87254,0.87228,0.874521746031746
+tfidf_cosinus,test,True,0.8324,0.7787,0.74828,0.8716242063492063
+minilm,test,True,0.807,0.74816,0.71858,0.8527197222222221
+fusion (alpha = 0.5),test,True,0.842,0.78946,0.76046,0.8795477777777778
+minilm + classe predite,test,True,0.8732,0.8732,0.8732,0.8732
+fusion + classe predite,test,True,0.8732,0.8732,0.8732,0.8732
+fusion + classe predite si confiance >= 0.2,test,True,0.873,0.87254,0.87228,0.874521746031746

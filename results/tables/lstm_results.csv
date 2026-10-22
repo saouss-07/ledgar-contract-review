@@ -1,0 +1,4 @@
+model,best_epoch,split,accuracy,macro_f1
+bilstm_glove,11,validation,0.8576,0.7883032336940371
+bilstm_glove,11,test,0.8595,0.7874823662081156
+bilstm_glove,11,test_sans_doublons,0.8560403375180078,0.7836374306185028
