@@ -1,0 +1,4 @@
+modele,cible_accuracy,seuil_choisi_sur_validation,test_part_automatique,test_accuracy_automatique,test_part_envoyee_avocat,test_accuracy_clauses_envoyees
+baseline,0.95,0.74236,0.8101,0.9475373410690038,0.18989999999999996,0.5560821484992101
+legalbert_full_es,0.95,0.996415,0.7995,0.9483427141963727,0.2005,0.6214463840399003
+lstm,0.95,0.862605,0.7652,0.9477260846837429,0.2348,0.5719761499148212

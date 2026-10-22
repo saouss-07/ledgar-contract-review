@@ -1,0 +1,10 @@
+modele,type_de_sonde,clause,type_attendu,type_predit,confiance,correct,envoyee_avocat
+baseline,"anglais, style européen",This Agreement shall be governed by and construed in accordance with the laws of England a…,Governing Laws,Governing Laws,0.936,True,False
+baseline,"anglais, style européen",Any dispute arising out of or in connection with this Agreement shall be submitted to the …,Submission To Jurisdiction,Jurisdictions,0.592,False,True
+baseline,"anglais, style européen",Each party shall comply with Regulation (EU) 2016/679 (the General Data Protection Regulat…,Compliance With Laws,Confidentiality,0.122,False,True
+baseline,"anglais, style européen",The Recipient shall keep all Confidential Information strictly confidential and shall not …,Confidentiality,Confidentiality,0.997,True,False
+baseline,français,Le présent contrat est régi par le droit français et sera interprété conformément à celui-…,Governing Laws,Amendments,0.028,False,True
+baseline,français,Chacune des parties peut résilier le présent contrat moyennant un préavis écrit de trente …,Terminations,Modifications,0.142,False,True
+baseline,français,Le destinataire s'engage à garder strictement confidentielles les informations transmises …,Confidentiality,Fees,0.027,False,True
+baseline,type absent des 100,"For a period of two years after the termination of his employment, the Employee shall not …",aucun des 100,Terms,0.201,False,True
+baseline,type absent des 100,The Supplier's total liability under this Agreement shall not exceed the fees paid by the …,aucun des 100,Fees,0.343,False,True
