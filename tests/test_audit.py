@@ -1,8 +1,31 @@
 import numpy as np
 import pandas as pd
 
-from ledgar.audit import (change_figures, choose_threshold, combined_ood, expected_calibration_error, swap_company_form,
-                          swap_gender, swap_jurisdiction, wilson)
+from ledgar.audit import (BERT_SAME_COVERAGE, COMBINED, change_figures, choose_threshold, combine_rules, combined_ood,
+                          expected_calibration_error, subgroup_table, swap_company_form, swap_gender, swap_jurisdiction,
+                          wilson)
+
+
+def test_combine_rules_and_equal_coverage():
+    b_pred, b_conf = [0, 1, 2, 3, 4], [0.9, 0.9, 0.5, 0.9, 0.9]
+    l_pred, l_conf = [0, 1, 2, 9, 4], [0.999, 0.80, 0.999, 0.999, 0.70]
+    rules = combine_rules(b_pred, b_conf, l_pred, l_conf, {"baseline": 0.74, "legalbert_full_es": 0.99})
+    # combined: agree (0, 1, 2, 4) AND baseline sure (not 2) -> clauses 0, 1, 4
+    assert rules[COMBINED][0].tolist() == [True, True, False, False, True]
+    assert rules["Legal-BERT seul"][0].tolist() == [True, False, True, True, False]
+    # same coverage = Legal-BERT's 3 most confident clauses (0, 2, 3), whatever the baseline says
+    assert rules[BERT_SAME_COVERAGE][0].sum() == rules[COMBINED][0].sum() == 3
+    assert rules[BERT_SAME_COVERAGE][0].tolist() == [True, False, True, True, False]
+    assert (rules[COMBINED][1] == np.array(l_pred)).all(), "the combined rule keeps Legal-BERT's labels"
+
+
+def test_subgroup_macro_f1_ignores_types_absent_from_the_group():
+    df = pd.DataFrame({"g": ["a", "a", "a", "b"], "label": [0, 0, 1, 2], "m_pred": [0, 5, 1, 2]})
+    df["m_ok"] = df["m_pred"] == df["label"]
+    t = subgroup_table(df, models={"m": "m"}, columns=["g"]).set_index("groupe")
+    # group a: type 0 has F1 = 2/3, type 1 has F1 = 1; the wrongly predicted type 5 must not count as a 0
+    assert abs(t.loc["a", "m_macro_f1"] - (2 / 3 + 1) / 2) < 1e-9
+    assert t.loc["a", "m_accuracy"] == 2 / 3 and t.loc["b", "m_macro_f1"] == 1.0
 
 
 def test_combined_rule_catches_a_confident_bert_error():

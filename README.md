@@ -189,13 +189,13 @@ Banque = les 60 000 clauses du train ; une clause retrouvée est pertinente si e
 
 ### Volet C · Audit : où lui faire confiance
 
-Détail, usages interdits et limites : **[`reports/model_card.md`](reports/model_card.md)**. Les quatre constats principaux (test) :
+Détail, usages interdits et limites : **[`reports/model_card.md`](reports/model_card.md)**. Les cinq constats principaux (test) :
 
 - **Formules types contre formulations nouvelles.** 98,8 % d'accuracy sur les clauses quasi copiées du train (15 % du test), 81,5 % sur les formulations nouvelles (63 %) pour la baseline ; Legal-BERT y gagne 1,5 point (83,0 %). Les types rares perdent ~15 points.
 - **Confiance.** Celle de la baseline est honnête (ECE 0,023) ; Legal-BERT est très surconfiant (confiance moyenne 0,98 pour 0,88 d'accuracy, 74 % de ses erreurs à plus de 0,9).
 - **Relecture humaine.** Un seuil choisi sur la validation pour 95 % d'accuracy laisse les deux modèles étiqueter seuls ~80 % des clauses (94,8 % d'accuracy au test) et envoie les ~20 % restantes à un avocat.
 - **Robustesse.** Genre, forme de société et chiffres changent moins de 3,5 % des prédictions des deux modèles ; remplacer la juridiction par la France en change 11,8 % pour la baseline (accuracy 81 % → 72 %) mais 4,4 % pour Legal-BERT. Sur 9 clauses pièges (français, style européen, types absents des 100), Legal-BERT se trompe moins mais laisse passer une erreur à 99,9 % de confiance ; la baseline n'en laisse passer aucune.
-- **Système recommandé : Legal-BERT ET la baseline.** Legal-BERT propose le type ; la clause n'est étiquetée sans relecture que si la baseline est d'accord et confiante. Au test : 31 erreurs non relues pour 1 000 clauses, contre 41 pour Legal-BERT seul, pour 78 % de clauses traitées seules (`python -m ledgar.audit --combined`, figure `results/figures/audit_combined.png`).
+- **Système recommandé : Legal-BERT ET la baseline.** Legal-BERT propose le type ; la clause n'est étiquetée sans relecture que si la baseline est d'accord et confiante. Au test, à couverture égale (78 % de clauses traitées seules) : 31 erreurs non relues pour 1 000 clauses contre 38 pour Legal-BERT seul, soit 19 % de moins (validation : 21 %) (`python -m ledgar.audit --combined`, figure `results/figures/audit_combined.png`).
 
 ## Règles de travail
 

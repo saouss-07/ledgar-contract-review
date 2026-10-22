@@ -235,19 +235,31 @@ def ood_report(predict_proba, names, threshold, model_name):
 
 # ---------------------------------------------------------------- part 3: BERT AND the baseline
 
-def review_rules(split, thresholds):
-    """Which clauses are labelled without review, under three rules (thresholds chosen on validation).
+COMBINED = "Legal-BERT ET baseline"
+BERT_SAME_COVERAGE = "Legal-BERT seul, même couverture"
+
+
+def combine_rules(b_pred, b_conf, l_pred, l_conf, thresholds):
+    """Which clauses are labelled without review, under four rules. Returns {rule: (auto mask, predictions)}.
 
     The combined rule keeps Legal-BERT's label (the more accurate model) but labels a clause alone only if the
     baseline agrees AND is confident: the baseline's honest confidence becomes the safety net of BERT's labels.
-    Returns {rule: (auto mask, predictions)}.
+    It reviews a few more clauses than Legal-BERT alone, so it is also compared at EQUAL coverage: Legal-BERT alone
+    on its k most confident clauses, k = the number of clauses the combined rule labels alone.
     """
+    b_pred, b_conf, l_pred, l_conf = map(np.asarray, (b_pred, b_conf, l_pred, l_conf))
+    b_sure, l_sure = b_conf >= thresholds["baseline"], l_conf >= thresholds["legalbert_full_es"]
+    combined = (b_pred == l_pred) & b_sure
+    same_coverage = np.zeros(len(l_conf), dtype=bool)
+    same_coverage[np.argsort(-l_conf, kind="stable")[:int(combined.sum())]] = True
+    return {"Legal-BERT seul": (l_sure, l_pred), BERT_SAME_COVERAGE: (same_coverage, l_pred),
+            "baseline seule": (b_sure, b_pred), COMBINED: (combined, l_pred)}
+
+
+def review_rules(split, thresholds):
     b, l = load_predictions("baseline", split), load_predictions("legalbert_full_es", split)
-    b_sure, l_sure = b["confidence"].to_numpy() >= thresholds["baseline"], l["confidence"].to_numpy() >= thresholds["legalbert_full_es"]
-    agree = b["pred"].to_numpy() == l["pred"].to_numpy()
-    return {"Legal-BERT seul": (l_sure, l["pred"].to_numpy()),
-            "baseline seule": (b_sure, b["pred"].to_numpy()),
-            "Legal-BERT ET baseline (accord + baseline confiante)": (agree & b_sure, l["pred"].to_numpy())}, b["label"].to_numpy()
+    rules = combine_rules(b["pred"], b["confidence"], l["pred"], l["confidence"], thresholds)
+    return rules, b["label"].to_numpy()
 
 
 def combined_table(thresholds):
@@ -283,8 +295,8 @@ STYLE = {"figure.facecolor": "#fcfcfb", "axes.facecolor": "#fcfcfb", "savefig.fa
 
 
 def plot_subgroups(table, path, models=("baseline", "legalbert_full_es")):
-    keep = [("wording", None), ("freq_group", None), ("truncated_256", None), ("jurisdiction_group", None)]
-    rows = pd.concat([table[(table.attribut == a) & table.assez_grand] for a, _ in keep])
+    keep = ["wording", "freq_group", "truncated_256", "jurisdiction_group"]
+    rows = pd.concat([table[(table.attribut == a) & table.assez_grand] for a in keep])
     labels = {"wording": "Formulation", "freq_group": "Fréquence du type", "truncated_256": "Longueur", "jurisdiction_group": "Juridiction"}
     rows = rows.iloc[::-1].reset_index(drop=True)
     with plt.rc_context(STYLE):
@@ -331,20 +343,22 @@ def plot_abstention(val, test, abst, path, models=("baseline", "legalbert_full_e
 
 def plot_combined(table, path):
     t = table[table.split == "test"].reset_index(drop=True)
-    colors = [ORANGE, BLUE, AQUA]
+    colors = {"Legal-BERT seul": ORANGE, BERT_SAME_COVERAGE: "#f2a27e", "baseline seule": BLUE, COMBINED: AQUA}
     with plt.rc_context(STYLE):
-        fig, ax = plt.subplots(figsize=(9, 3.2))
+        fig, ax = plt.subplots(figsize=(9, 3.6))
         y = np.arange(len(t))[::-1]
-        ax.barh(y, t["erreurs_non_relues_pour_1000"], color=colors, height=0.55)
+        ax.barh(y, t["erreurs_non_relues_pour_1000"], color=[colors[r] for r in t["regle"]], height=0.55)
         for yi, (_, r) in zip(y, t.iterrows()):
             ax.text(r.erreurs_non_relues_pour_1000 + 0.6, yi, f"{r.erreurs_non_relues_pour_1000:.0f} erreurs · "
                     f"{100 * r.part_automatique:.0f} % des clauses sans relecture", va="center", fontsize=9, color=INK_2)
-        ax.set_yticks(y, t["regle"].str.replace(" (accord + baseline confiante)", "\n(accord + baseline confiante)", regex=False))
+        ax.set_yticks(y, t["regle"])
         ax.set_xlim(0, t["erreurs_non_relues_pour_1000"].max() * 1.9)
         ax.set_xlabel("erreurs qui échappent à l'avocat, pour 1 000 clauses (test)")
-        best, solo = t.iloc[2], t.iloc[0]
-        fig.suptitle(f"BERT ET baseline : {100 * (1 - best.erreurs_non_relues_pour_1000 / solo.erreurs_non_relues_pour_1000):.0f} % "
-                     f"d'erreurs non relues en moins que BERT seul", x=0.02, ha="left", fontsize=12, fontweight="bold", color=INK)
+        best = t[t.regle == COMBINED].iloc[0]
+        same = t[t.regle == BERT_SAME_COVERAGE].iloc[0]
+        fig.suptitle(f"BERT ET baseline : {100 * (1 - best.erreurs_non_relues_pour_1000 / same.erreurs_non_relues_pour_1000):.0f} % "
+                     f"d'erreurs non relues en moins que BERT seul, à couverture égale", x=0.02, ha="left", fontsize=12,
+                     fontweight="bold", color=INK)
         ax.grid(axis="y", visible=False)
         fig.tight_layout()
         fig.savefig(path, dpi=200)
@@ -386,7 +400,9 @@ def main():
     print("refitting the baseline for the counterfactual and OOD tests (~4 min)…", flush=True)
     vec = make_vectorizer()
     X = vec.fit_transform(ds["train"]["text"])
-    model = fit_model(X, ds["train"]["label"], C=30.0, class_weight="balanced")
+    chosen = pd.read_csv(TAB_DIR / "baseline_results.csv").iloc[0]       # setting chosen on validation by ledgar.baseline
+    weight = None if chosen["class_weight"] == "none" else chosen["class_weight"]
+    model = fit_model(X, ds["train"]["label"], C=float(chosen["C"]), class_weight=weight)
     predict_proba = lambda texts: model.predict_proba(vec.transform(texts))
     cf = counterfactual_report(predict_proba, test, "baseline")
     cf.to_csv(TAB_DIR / "audit_counterfactuals.csv", index=False)

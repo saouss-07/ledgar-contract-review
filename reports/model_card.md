@@ -36,7 +36,7 @@ genre…) sont déduits du texte par expressions régulières (`ledgar.metadata`
 | --- | --- | --- | --- |
 | TF-IDF + régression logistique (baseline) | 0,828 | 0,873 | ≈ 4 min, CPU |
 | Legal-BERT, fine-tuning complet, arrêt anticipé | 0,825 | 0,883 | ≈ 2 h 30, GPU T4 |
-| BiLSTM + GloVe | 0,788 | 0,860 | GPU, 19 s / epoch |
+| BiLSTM + GloVe | 0,787 | 0,860 | GPU, 19 s / epoch |
 | Legal-BERT + LoRA r = 8 (3 epochs) | 0,768 | 0,853 | ≈ 35 min, GPU |
 
 Legal-BERT égale la baseline en macro-F1 (écart non significatif, bootstrap apparié) et la dépasse d'un point en
@@ -119,11 +119,14 @@ confiante** (seuil 0,74, choisi sur la validation). Sinon, elle part chez un avo
 | Règle (test) | Clauses étiquetées seules | Leur accuracy | Erreurs non relues pour 1 000 clauses |
 | --- | --- | --- | --- |
 | Legal-BERT seul (seuil 0,996) | 80,0 % | 94,8 % | 41 |
+| Legal-BERT seul, même couverture (ses 78,3 % de clauses les plus confiantes) | 78,3 % | 95,1 % | 38 |
 | Baseline seule (seuil 0,74) | 81,0 % | 94,8 % | 42 |
 | **Legal-BERT ET baseline** | **78,3 %** | **96,1 %** | **31** |
 
-Un quart d'erreurs non relues en moins, pour 2 points de clauses en plus envoyées à un avocat ; même résultat sur la
-validation (30 contre 40). Quand les deux modèles sont en désaccord (10 % des clauses), Legal-BERT n'a raison que dans
+La règle combinée relit un peu plus de clauses que Legal-BERT seul (21,7 % contre 20,0 %). La comparaison juste se
+fait donc **à couverture égale** : 30,8 contre 38,2 erreurs non relues pour 1 000 clauses au test, soit **19 % de
+moins** (validation : 29,6 contre 37,3, soit 21 % de moins). Contre Legal-BERT seul à son propre seuil, l'écart est
+de 31 contre 41. Quand les deux modèles sont en désaccord (10 % des clauses), Legal-BERT n'a raison que dans
 43 % des cas : le désaccord est un excellent signal d'alerte. Figure : `results/figures/audit_combined.png`.
 
 ## Limites connues
@@ -132,6 +135,8 @@ validation (30 contre 40). Quand les deux modèles sont en désaccord (10 % des 
   (`ledgar.audit.counterfactual_report` et `ood_report` acceptent n'importe quelle fonction de prédiction).
 - La règle combinée a été conçue après avoir vu les sondes hors distribution ; ses seuils viennent de la validation et
   son gain est le même sur la validation et sur le test.
+- Le contrefactuel de juridiction produit des tournures qui n'existent pas en pratique (« the laws of the State of
+  France ») : une partie des prédictions qui changent peut venir de la tournure inhabituelle plutôt que du pays.
 - La confiance de Legal-BERT pourrait être recalibrée (*temperature scaling* sur la validation) : piste non testée.
 - Attributs d'audit déduits par regex, sur une seule clause ; « emploi » inclut les attributions d'actions.
 - Un seul run (seed) par modèle ; clauses tronquées à 256 tokens pour BERT.
