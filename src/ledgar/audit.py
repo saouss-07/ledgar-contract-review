@@ -12,7 +12,10 @@ in ledgar.baseline); for Legal-BERT, call counterfactual_report / ood_report on 
       form, figures) and measure the flip rate;
     - out-of-distribution probes: European-style clauses in English, French clauses, types outside the 100.
 
+Part 3 combines the two models: Legal-BERT labels, the baseline's honest confidence decides what goes to a lawyer.
+
     python -m ledgar.audit              # ~10 min on a laptop CPU
+    python -m ledgar.audit --combined   # part 3 only, from the saved predictions (seconds)
 Outputs: results/tables/audit_*.csv and results/figures/audit_*.png
 """
 import math
@@ -230,6 +233,44 @@ def ood_report(predict_proba, names, threshold, model_name):
     return pd.DataFrame(rows)
 
 
+# ---------------------------------------------------------------- part 3: BERT AND the baseline
+
+def review_rules(split, thresholds):
+    """Which clauses are labelled without review, under three rules (thresholds chosen on validation).
+
+    The combined rule keeps Legal-BERT's label (the more accurate model) but labels a clause alone only if the
+    baseline agrees AND is confident: the baseline's honest confidence becomes the safety net of BERT's labels.
+    Returns {rule: (auto mask, predictions)}.
+    """
+    b, l = load_predictions("baseline", split), load_predictions("legalbert_full_es", split)
+    b_sure, l_sure = b["confidence"].to_numpy() >= thresholds["baseline"], l["confidence"].to_numpy() >= thresholds["legalbert_full_es"]
+    agree = b["pred"].to_numpy() == l["pred"].to_numpy()
+    return {"Legal-BERT seul": (l_sure, l["pred"].to_numpy()),
+            "baseline seule": (b_sure, b["pred"].to_numpy()),
+            "Legal-BERT ET baseline (accord + baseline confiante)": (agree & b_sure, l["pred"].to_numpy())}, b["label"].to_numpy()
+
+
+def combined_table(thresholds):
+    rows = []
+    for split in ("validation", "test"):
+        rules, y = review_rules(split, thresholds)
+        for name, (auto, pred) in rules.items():
+            ok = pred == y
+            rows.append({"split": split, "regle": name, "part_automatique": auto.mean(), "accuracy_automatique": ok[auto].mean(),
+                         "erreurs_non_relues_pour_1000": 1000 * np.mean(auto & ~ok), "part_envoyee_avocat": 1 - auto.mean()})
+    return pd.DataFrame(rows)
+
+
+def combined_ood(ood_baseline, ood_bert, threshold_baseline):
+    """Apply the combined rule to the hand-written probes (one row per probe, both models side by side)."""
+    m = ood_baseline.merge(ood_bert, on=["type_de_sonde", "clause", "type_attendu"], suffixes=("_baseline", "_bert"))
+    m["envoyee_avocat_combine"] = (m["type_predit_baseline"] != m["type_predit_bert"]) | (m["confiance_baseline"] < threshold_baseline)
+    m["erreur_non_relue_combine"] = ~m["correct_bert"] & ~m["envoyee_avocat_combine"]
+    m["erreur_non_relue_bert_seul"] = ~m["correct_bert"] & ~m["envoyee_avocat_bert"]
+    m["erreur_non_relue_baseline_seule"] = ~m["correct_baseline"] & ~m["envoyee_avocat_baseline"]
+    return m
+
+
 # ---------------------------------------------------------------- figures
 
 BLUE, ORANGE, AQUA = "#2a78d6", "#eb6834", "#1baf7a"
@@ -288,6 +329,43 @@ def plot_abstention(val, test, abst, path, models=("baseline", "legalbert_full_e
         plt.close(fig)
 
 
+def plot_combined(table, path):
+    t = table[table.split == "test"].reset_index(drop=True)
+    colors = [ORANGE, BLUE, AQUA]
+    with plt.rc_context(STYLE):
+        fig, ax = plt.subplots(figsize=(9, 3.2))
+        y = np.arange(len(t))[::-1]
+        ax.barh(y, t["erreurs_non_relues_pour_1000"], color=colors, height=0.55)
+        for yi, (_, r) in zip(y, t.iterrows()):
+            ax.text(r.erreurs_non_relues_pour_1000 + 0.6, yi, f"{r.erreurs_non_relues_pour_1000:.0f} erreurs · "
+                    f"{100 * r.part_automatique:.0f} % des clauses sans relecture", va="center", fontsize=9, color=INK_2)
+        ax.set_yticks(y, t["regle"].str.replace(" (accord + baseline confiante)", "\n(accord + baseline confiante)", regex=False))
+        ax.set_xlim(0, t["erreurs_non_relues_pour_1000"].max() * 1.9)
+        ax.set_xlabel("erreurs qui échappent à l'avocat, pour 1 000 clauses (test)")
+        best, solo = t.iloc[2], t.iloc[0]
+        fig.suptitle(f"BERT ET baseline : {100 * (1 - best.erreurs_non_relues_pour_1000 / solo.erreurs_non_relues_pour_1000):.0f} % "
+                     f"d'erreurs non relues en moins que BERT seul", x=0.02, ha="left", fontsize=12, fontweight="bold", color=INK)
+        ax.grid(axis="y", visible=False)
+        fig.tight_layout()
+        fig.savefig(path, dpi=200)
+        plt.close(fig)
+
+
+def run_combined():
+    """Part 3 only: reads the saved predictions and audit tables, no model to fit (a few seconds)."""
+    ab = pd.read_csv(TAB_DIR / "audit_abstention.csv").set_index("modele")["seuil_choisi_sur_validation"].to_dict()
+    table = combined_table(ab)
+    table.to_csv(TAB_DIR / "audit_combined_rule.csv", index=False)
+    plot_combined(table, FIG_DIR / "audit_combined.png")
+    print(table.round(3).to_string(index=False))
+    bert_ood = TAB_DIR / "audit_ood_legalbert.csv"     # produced on Colab with Legal-BERT (see the model card)
+    if bert_ood.exists():
+        m = combined_ood(pd.read_csv(TAB_DIR / "audit_ood.csv"), pd.read_csv(bert_ood), ab["baseline"])
+        m.to_csv(TAB_DIR / "audit_ood_combined.csv", index=False)
+        print(m[["type_de_sonde", "type_predit_baseline", "type_predit_bert", "correct_bert", "erreur_non_relue_bert_seul",
+                 "erreur_non_relue_combine"]].to_string(index=False))
+
+
 # ---------------------------------------------------------------- main
 
 def main():
@@ -316,7 +394,10 @@ def main():
     ood = ood_report(predict_proba, names, thr, "baseline")
     ood.to_csv(TAB_DIR / "audit_ood.csv", index=False)
     print(cf.round(3).to_string(index=False), "\n", ood.to_string(index=False))
+    run_combined()
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    run_combined() if "--combined" in sys.argv else main()

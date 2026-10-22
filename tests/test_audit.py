@@ -1,7 +1,19 @@
 import numpy as np
+import pandas as pd
 
-from ledgar.audit import (change_figures, choose_threshold, expected_calibration_error, swap_company_form, swap_gender,
-                          swap_jurisdiction, wilson)
+from ledgar.audit import (change_figures, choose_threshold, combined_ood, expected_calibration_error, swap_company_form,
+                          swap_gender, swap_jurisdiction, wilson)
+
+
+def test_combined_rule_catches_a_confident_bert_error():
+    keys = {"type_de_sonde": ["x", "y", "z"], "clause": ["a", "b", "c"], "type_attendu": ["A", "B", None]}
+    base = pd.DataFrame({**keys, "type_predit": ["A", "B", "F"], "confiance": [0.9, 0.9, 0.3],
+                         "correct": [True, True, False], "envoyee_avocat": [False, False, True]})
+    bert = pd.DataFrame({**keys, "type_predit": ["A", "C", "F"], "confiance": [0.999, 0.999, 0.999],
+                         "correct": [True, False, False], "envoyee_avocat": [False, False, False]})
+    m = combined_ood(base, bert, threshold_baseline=0.74)
+    assert m["envoyee_avocat_combine"].tolist() == [False, True, True]   # agree + sure / disagree / baseline unsure
+    assert m["erreur_non_relue_bert_seul"].sum() == 2 and m["erreur_non_relue_combine"].sum() == 0
 
 
 def test_swap_gender_both_ways_and_case():

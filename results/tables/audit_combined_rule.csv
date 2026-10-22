@@ -1,0 +1,7 @@
+split,regle,part_automatique,accuracy_automatique,erreurs_non_relues_pour_1000,part_envoyee_avocat
+validation,Legal-BERT seul,0.8048,0.9499254473161034,40.300000000000004,0.19520000000000004
+validation,baseline seule,0.8152,0.9500736015701668,40.7,0.18479999999999996
+validation,Legal-BERT ET baseline (accord + baseline confiante),0.7914,0.9625979277230224,29.6,0.2086
+test,Legal-BERT seul,0.7995,0.9483427141963727,41.300000000000004,0.2005
+test,baseline seule,0.8101,0.9475373410690038,42.5,0.18989999999999996
+test,Legal-BERT ET baseline (accord + baseline confiante),0.7831,0.9606691354871664,30.8,0.21689999999999998

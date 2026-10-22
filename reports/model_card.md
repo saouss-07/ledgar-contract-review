@@ -18,7 +18,7 @@ doit pas être utilisé**. Chiffres issus de `python -m ledgar.audit` (tableaux 
 - **Pas de contrats en français ni dans une autre langue** : les 3 clauses françaises testées sont toutes mal classées
   (voir « Hors distribution »).
 - **Pas de droit non américain sans validation préalable** : changer « State of New York » en « France » fait changer
-  la prédiction de 12 % des clauses concernées.
+  la prédiction de 12 % des clauses concernées pour la baseline (4 % pour Legal-BERT).
 - **Pas de types hors des 100 de LEDGAR** (non-concurrence, limitation de responsabilité…) : le système n'a pas de
   réponse « autre » ; il propose un type existant, avec une confiance faible.
 - **Pas d'usage de la confiance brute de Legal-BERT comme probabilité** : elle est très surestimée (voir « Calibration »).
@@ -78,38 +78,61 @@ traitées seules donne au test (`results/figures/audit_abstention.png`) :
 Avec une relecture humaine calibrée, les deux modèles se valent ; la baseline le fait sur CPU, avec une confiance
 lisible et des décisions explicables (mots pondérés).
 
-## Robustesse : tests contrefactuels (baseline)
+## Robustesse : tests contrefactuels
 
-On modifie un élément qui ne change pas le type de la clause, et on compte les prédictions qui changent.
+On modifie un élément qui ne change pas le type de la clause, et on compte les prédictions qui changent
+(`audit_counterfactuals.csv` pour la baseline, `audit_counterfactuals_legalbert.csv` pour Legal-BERT, lancé sur Colab
+avec le modèle final par le volet A).
 
-| Modification | Clauses | Prédictions changées | Accuracy avant → après |
+| Modification | Clauses | Baseline : prédictions changées (accuracy avant → après) | Legal-BERT |
 | --- | --- | --- | --- |
-| Genre des pronoms (he ↔ she) | 479 | 1,5 % | 82,0 % → 82,0 % |
-| Forme de société (Inc. → SAS, LLC → GmbH…) | 218 | 3,2 % | 80,3 % → 81,2 % |
-| Chiffres (délais + 15, $ → €) | 878 | 0,5 % | 90,3 % → 90,4 % |
-| Juridiction → England and Wales | 796 | 8,9 % | 81,0 % → 85,6 % |
-| **Juridiction → France** | 797 | **11,8 %** | **81,1 % → 71,6 %** |
+| Genre des pronoms (he ↔ she) | 479 | 1,5 % (82,0 % → 82,0 %) | 1,5 % (82,5 % → 82,0 %) |
+| Forme de société (Inc. → SAS, LLC → GmbH…) | 218 | 3,2 % (80,3 % → 81,2 %) | 1,8 % (80,3 % → 79,4 %) |
+| Chiffres (délais + 15, $ → €) | 878 | 0,5 % (90,3 % → 90,4 %) | 0,7 % (91,0 % → 90,9 %) |
+| Juridiction → England and Wales | 796 | 8,9 % (81,0 % → 85,6 %) | 3,8 % (86,2 % → 85,7 %) |
+| **Juridiction → France** | 797 | **11,8 % (81,1 % → 71,6 %)** | **4,4 % (86,2 % → 84,7 %)** |
 
-Pas de sensibilité notable au genre, à la forme de société ou aux chiffres. En revanche, le modèle est lié au
-vocabulaire américain : une juridiction française dégrade nettement les prédictions, ce qui confirme qu'un déploiement
-européen exige une validation sur des contrats européens.
+Aucun des deux modèles n'est sensible au genre, à la forme de société ou aux chiffres. La baseline est liée au
+vocabulaire américain (une juridiction française lui coûte 10 points) ; Legal-BERT, qui lit le sens de la clause, l'est
+trois fois moins. Un déploiement européen exige tout de même une validation sur des contrats européens.
 
-## Hors distribution (9 clauses rédigées à la main, baseline)
+## Hors distribution (9 clauses rédigées à la main)
 
-| Sonde | Correctes | Envoyées à un avocat par le seuil |
-| --- | --- | --- |
-| Anglais, style européen (4) | 2 | les 2 erreurs |
-| Français (3) | 0 | les 3 |
-| Type absent des 100 (2) | — | les 2 |
+| Sonde | Baseline : correctes | Legal-BERT : correctes | Erreurs qui échappent à l'avocat (baseline / BERT seul / combiné) |
+| --- | --- | --- | --- |
+| Anglais, style européen (4) | 2 | 3 | 0 / 0 / 0 |
+| Français (3) | 0 | 1 | 0 / 0 / 0 |
+| Type absent des 100 (2) | — | — | 0 / **1** / 0 |
 
-Les 7 erreurs ont toutes une confiance sous le seuil : la relecture humaine les aurait rattrapées. Détail :
-`results/tables/audit_ood.csv`. Ces sondes illustrent, elles ne mesurent pas.
+Legal-BERT se trompe moins, mais **une de ses erreurs passe le seuil** : la clause de plafond de responsabilité (type
+absent des 100) est classée *Fees* avec 99,9 % de confiance. Il classe aussi la clause française sur le droit
+applicable faux avec 98,6 % de confiance (rattrapée de justesse par son seuil de 0,996). Avec la règle combinée
+ci-dessous, aucune erreur n'échappe à la relecture. Détail : `audit_ood.csv`, `audit_ood_legalbert.csv`,
+`audit_ood_combined.csv`. Ces sondes illustrent, elles ne mesurent pas.
+
+## Système recommandé : Legal-BERT ET la baseline
+
+Chaque modèle a une force : Legal-BERT est plus précis et plus robuste, la baseline a une confiance honnête. On les
+combine : **Legal-BERT propose le type, et la clause n'est étiquetée sans relecture que si la baseline est d'accord et
+confiante** (seuil 0,74, choisi sur la validation). Sinon, elle part chez un avocat.
+
+| Règle (test) | Clauses étiquetées seules | Leur accuracy | Erreurs non relues pour 1 000 clauses |
+| --- | --- | --- | --- |
+| Legal-BERT seul (seuil 0,996) | 80,0 % | 94,8 % | 41 |
+| Baseline seule (seuil 0,74) | 81,0 % | 94,8 % | 42 |
+| **Legal-BERT ET baseline** | **78,3 %** | **96,1 %** | **31** |
+
+Un quart d'erreurs non relues en moins, pour 2 points de clauses en plus envoyées à un avocat ; même résultat sur la
+validation (30 contre 40). Quand les deux modèles sont en désaccord (10 % des clauses), Legal-BERT n'a raison que dans
+43 % des cas : le désaccord est un excellent signal d'alerte. Figure : `results/figures/audit_combined.png`.
 
 ## Limites connues
 
-- Les contrefactuels et les sondes hors distribution sont faits sur la baseline : les poids de Legal-BERT ne sont pas
-  dans le repo. `ledgar.audit.counterfactual_report` et `ood_report` acceptent n'importe quelle fonction de prédiction
-  pour les relancer sur BERT.
+- Les poids de Legal-BERT ne sont pas dans le repo : ses contrefactuels et sondes ont été lancés sur Colab
+  (`ledgar.audit.counterfactual_report` et `ood_report` acceptent n'importe quelle fonction de prédiction).
+- La règle combinée a été conçue après avoir vu les sondes hors distribution ; ses seuils viennent de la validation et
+  son gain est le même sur la validation et sur le test.
+- La confiance de Legal-BERT pourrait être recalibrée (*temperature scaling* sur la validation) : piste non testée.
 - Attributs d'audit déduits par regex, sur une seule clause ; « emploi » inclut les attributions d'actions.
 - Un seul run (seed) par modèle ; clauses tronquées à 256 tokens pour BERT.
 - Évaluation sur des contrats de 2019 : le vocabulaire juridique évolue (dérive à surveiller).
@@ -121,4 +144,5 @@ Les 7 erreurs ont toutes une confiance sous le seuil : la relecture humaine les 
 ```bash
 python -m ledgar.baseline   # baseline et ses prédictions
 python -m ledgar.audit      # cette fiche : tableaux et figures audit_*
+python -m ledgar.audit --combined   # la règle Legal-BERT ET baseline seule, en quelques secondes
 ```
